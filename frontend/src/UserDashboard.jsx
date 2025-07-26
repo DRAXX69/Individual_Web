@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './App.css';
+import apiService from './services/api';
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ function UserDashboard() {
   ];
 
   const handleLogout = () => {
+    apiService.removeAuthToken();
     navigate('/');
   };
 
