@@ -1,0 +1,188 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* VIP Motors Red & Black Theme */
+body, #root, .redblack-bg {
+  min-height: 100vh;
+}
+
+.login-container {
+  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('/jesko.jpg') center center/cover no-repeat;
+}
+
+.login-card.desktop-card {
+  background: #181818;
+  padding: 2.5rem 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(179, 0, 0, 0.25);
+  max-width: 350px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.8s;
+  border: 2px solid #b30000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card h2 {
+  margin-bottom: 1.5rem;
+  color: #b30000;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-size: 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.login-form input {
+  padding: 0.9rem 1.2rem;
+  border: 1.5px solid #333;
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
+  outline: none;
+  background: #222;
+  color: #fff;
+  transition: border 0.2s;
+}
+
+.login-form input:focus {
+  border: 2px solid #b30000;
+}
+
+.login-btn {
+  background: linear-gradient(90deg, #b30000 0%, #1a1a1a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px #b3000033;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #1a1a1a 0%, #b30000 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.role-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.role-toggle button {
+  background: #222;
+  border: 1.5px solid #b30000;
+  border-radius: 0.75rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #b30000;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  letter-spacing: 1px;
+}
+
+.role-toggle button.active, .role-toggle button:hover {
+  background: #b30000;
+  color: #fff;
+  border: 1.5px solid #fff;
+}
+
+.signup-link {
+  margin-top: 1.5rem;
+  font-size: 1.05rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.signup-btn {
+  background: none;
+  border: none;
+  color: #b30000;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+  letter-spacing: 1px;
+}
+
+.signup-btn:hover {
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .login-card.desktop-card {
+    max-width: 95vw;
+    padding: 2rem 1rem;
+  }
+}
