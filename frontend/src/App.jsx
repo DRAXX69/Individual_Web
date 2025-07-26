@@ -1,6 +1,8 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './App.css';
+import UserDashboard from './UserDashboard';
+import AdminDashboard from './AdminDashboard';
 
 function LoginPage() {
   const [role, setRole] = useState('user');
@@ -82,6 +84,8 @@ function App() {
       <Route path="/" element={<LoginPage />} />
       <Route path="/signup/user" element={<SignupUserPage />} />
       <Route path="/signup/admin" element={<SignupAdminPage />} />
+      <Route path="/dashboard/user" element={<UserDashboard />} />
+      <Route path="/dashboard/admin" element={<AdminDashboard />} />
     </Routes>
   );
 }
