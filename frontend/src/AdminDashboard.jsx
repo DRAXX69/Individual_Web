@@ -1,49 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import apiService from './services/api';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [cars, setCars] = useState([
-    {
-      id: 1,
-      name: "Koenigsegg Jesko",
-      brand: "Koenigsegg",
-      price: 3000000,
-      image: "/jesko.jpg",
-      specs: {
-        engine: "5.0L Twin-Turbo V8",
-        horsepower: 1600,
-        topSpeed: "330 mph",
-        acceleration: "0-60 mph in 2.5s",
-        transmission: "9-speed Multi-clutch",
-        drivetrain: "RWD"
-      },
-      description: "The Koenigsegg Jesko is a track-focused hypercar with revolutionary aerodynamics and unmatched performance.",
-      featured: true,
-      availability: true
-    },
-    {
-      id: 2,
-      name: "Bugatti Chiron Super Sport",
-      brand: "Bugatti",
-      price: 3900000,
-      image: "/chiron.jpg",
-      specs: {
-        engine: "8.0L Quad-Turbo W16",
-        horsepower: 1577,
-        topSpeed: "304 mph",
-        acceleration: "0-60 mph in 2.4s",
-        transmission: "7-speed Dual-clutch",
-        drivetrain: "AWD"
-      },
-      description: "The ultimate expression of Bugatti's engineering prowess, combining luxury with extreme performance.",
-      featured: true,
-      availability: true
-    }
-  ]);
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [editingCar, setEditingCar] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCar, setNewCar] = useState({
@@ -64,82 +29,135 @@ function AdminDashboard() {
     availability: true
   });
 
+  // Fetch cars from backend on component mount
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = async () => {
+    try {
+      setLoading(true);
+      const carsData = await apiService.getCars();
+      setCars(carsData);
+      setError('');
+    } catch (error) {
+      setError('Failed to fetch cars: ' + error.message);
+      console.error('Error fetching cars:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     apiService.removeAuthToken();
     navigate('/');
   };
 
-  const handleAddCar = () => {
-    const carToAdd = {
-      ...newCar,
-      id: Date.now(),
-      price: parseFloat(newCar.price),
-      specs: {
-        ...newCar.specs,
-        horsepower: parseInt(newCar.specs.horsepower)
-      }
-    };
-    setCars([...cars, carToAdd]);
-    setNewCar({
-      name: '',
-      brand: '',
-      price: '',
-      image: '',
-      specs: {
-        engine: '',
-        horsepower: '',
-        topSpeed: '',
-        acceleration: '',
-        transmission: '',
-        drivetrain: ''
-      },
-      description: '',
-      featured: false,
-      availability: true
-    });
-    setShowAddForm(false);
+  const handleAddCar = async () => {
+    try {
+      setLoading(true);
+      const carToAdd = {
+        ...newCar,
+        price: parseFloat(newCar.price),
+        specs: {
+          ...newCar.specs,
+          horsepower: parseInt(newCar.specs.horsepower)
+        }
+      };
+      
+      await apiService.addCar(carToAdd);
+      await fetchCars(); // Refresh the cars list
+      
+      setNewCar({
+        name: '',
+        brand: '',
+        price: '',
+        image: '',
+        specs: {
+          engine: '',
+          horsepower: '',
+          topSpeed: '',
+          acceleration: '',
+          transmission: '',
+          drivetrain: ''
+        },
+        description: '',
+        featured: false,
+        availability: true
+      });
+      setShowAddForm(false);
+      setError('');
+    } catch (error) {
+      setError('Failed to add car: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditCar = (car) => {
     setEditingCar({ ...car });
   };
 
-  const handleUpdateCar = () => {
-    setCars(cars.map(car => 
-      car.id === editingCar.id 
-        ? {
-            ...editingCar,
-            price: parseFloat(editingCar.price),
-            specs: {
-              ...editingCar.specs,
-              horsepower: parseInt(editingCar.specs.horsepower)
-            }
-          }
-        : car
-    ));
-    setEditingCar(null);
-  };
-
-  const handleDeleteCar = (carId) => {
-    if (window.confirm('Are you sure you want to delete this car?')) {
-      setCars(cars.filter(car => car.id !== carId));
+  const handleUpdateCar = async () => {
+    try {
+      setLoading(true);
+      const carToUpdate = {
+        ...editingCar,
+        price: parseFloat(editingCar.price),
+        specs: {
+          ...editingCar.specs,
+          horsepower: parseInt(editingCar.specs.horsepower)
+        }
+      };
+      
+      await apiService.updateCar(editingCar._id, carToUpdate);
+      await fetchCars(); // Refresh the cars list
+      setEditingCar(null);
+      setError('');
+    } catch (error) {
+      setError('Failed to update car: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleCarAvailability = (carId) => {
-    setCars(cars.map(car => 
-      car.id === carId 
-        ? { ...car, availability: !car.availability }
-        : car
-    ));
+  const handleDeleteCar = async (carId) => {
+    if (window.confirm('Are you sure you want to delete this car?')) {
+      try {
+        setLoading(true);
+        await apiService.deleteCar(carId);
+        await fetchCars(); // Refresh the cars list
+        setError('');
+      } catch (error) {
+        setError('Failed to delete car: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
-  const toggleCarFeatured = (carId) => {
-    setCars(cars.map(car => 
-      car.id === carId 
-        ? { ...car, featured: !car.featured }
-        : car
-    ));
+  const toggleCarAvailability = async (carId) => {
+    try {
+      const car = cars.find(c => c._id === carId);
+      const updatedCar = { ...car, availability: !car.availability };
+      await apiService.updateCar(carId, updatedCar);
+      await fetchCars(); // Refresh the cars list
+      setError('');
+    } catch (error) {
+      setError('Failed to update car availability: ' + error.message);
+    }
+  };
+
+  const toggleCarFeatured = async (carId) => {
+    try {
+      const car = cars.find(c => c._id === carId);
+      const updatedCar = { ...car, featured: !car.featured };
+      await apiService.updateCar(carId, updatedCar);
+      await fetchCars(); // Refresh the cars list
+      setError('');
+    } catch (error) {
+      setError('Failed to update car featured status: ' + error.message);
+    }
   };
 
   const formatPrice = (price) => {
@@ -151,366 +169,360 @@ function AdminDashboard() {
     }).format(price);
   };
 
-  const renderOverview = () => (
-    <div className="admin-overview">
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Cars</h3>
-          <p className="stat-number">{cars.length}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Available Cars</h3>
-          <p className="stat-number">{cars.filter(car => car.availability).length}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Featured Cars</h3>
-          <p className="stat-number">{cars.filter(car => car.featured).length}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Value</h3>
-          <p className="stat-number">{formatPrice(cars.reduce((sum, car) => sum + car.price, 0))}</p>
-        </div>
-      </div>
-      
-      <div className="recent-activity">
-        <h3>Quick Actions</h3>
-        <div className="action-buttons">
-          <button onClick={() => setActiveTab('manage')} className="action-btn">
-            Manage Cars
-          </button>
-          <button onClick={() => setShowAddForm(true)} className="action-btn">
-            Add New Car
-          </button>
-          <button onClick={() => setActiveTab('users')} className="action-btn">
-            View Users
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCarManagement = () => (
-    <div className="car-management">
-      <div className="management-header">
-        <h3>Car Inventory Management</h3>
-        <button onClick={() => setShowAddForm(true)} className="add-car-btn">
-          + Add New Car
-        </button>
-      </div>
-      
-      <div className="cars-table">
-        {cars.map(car => (
-          <div key={car.id} className="car-row">
-            <img src={car.image} alt={car.name} className="car-thumbnail" />
-            <div className="car-details">
-              <h4>{car.name}</h4>
-              <p>{car.brand} • {formatPrice(car.price)}</p>
-              <p>{car.specs.horsepower} HP • {car.specs.topSpeed}</p>
-            </div>
-            <div className="car-status">
-              <span className={`status-badge ${car.availability ? 'available' : 'unavailable'}`}>
-                {car.availability ? 'Available' : 'Unavailable'}
-              </span>
-              {car.featured && <span className="featured-badge">Featured</span>}
-            </div>
-            <div className="car-actions">
-              <button onClick={() => handleEditCar(car)} className="edit-btn">
-                Edit
-              </button>
-              <button 
-                onClick={() => toggleCarAvailability(car.id)} 
-                className={`toggle-btn ${car.availability ? 'disable' : 'enable'}`}
-              >
-                {car.availability ? 'Disable' : 'Enable'}
-              </button>
-              <button 
-                onClick={() => toggleCarFeatured(car.id)} 
-                className={`feature-btn ${car.featured ? 'unfeature' : 'feature'}`}
-              >
-                {car.featured ? 'Unfeature' : 'Feature'}
-              </button>
-              <button onClick={() => handleDeleteCar(car.id)} className="delete-btn">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderCarForm = (car, isEdit = false) => (
-    <div className="car-form">
-      <h3>{isEdit ? 'Edit Car' : 'Add New Car'}</h3>
-      <div className="form-grid">
-        <div className="form-group">
-          <label>Car Name</label>
-          <input
-            type="text"
-            value={car.name}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, name: e.target.value})
-              : setNewCar({...car, name: e.target.value})
-            }
-            placeholder="Enter car name"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Brand</label>
-          <input
-            type="text"
-            value={car.brand}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, brand: e.target.value})
-              : setNewCar({...car, brand: e.target.value})
-            }
-            placeholder="Enter brand"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Price ($)</label>
-          <input
-            type="number"
-            value={car.price}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, price: e.target.value})
-              : setNewCar({...car, price: e.target.value})
-            }
-            placeholder="Enter price"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Image URL</label>
-          <input
-            type="text"
-            value={car.image}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, image: e.target.value})
-              : setNewCar({...car, image: e.target.value})
-            }
-            placeholder="Enter image URL"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Engine</label>
-          <input
-            type="text"
-            value={car.specs.engine}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, engine: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, engine: e.target.value}})
-            }
-            placeholder="Enter engine specs"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Horsepower</label>
-          <input
-            type="number"
-            value={car.specs.horsepower}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, horsepower: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, horsepower: e.target.value}})
-            }
-            placeholder="Enter horsepower"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Top Speed</label>
-          <input
-            type="text"
-            value={car.specs.topSpeed}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, topSpeed: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, topSpeed: e.target.value}})
-            }
-            placeholder="Enter top speed"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Acceleration</label>
-          <input
-            type="text"
-            value={car.specs.acceleration}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, acceleration: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, acceleration: e.target.value}})
-            }
-            placeholder="Enter acceleration"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Transmission</label>
-          <input
-            type="text"
-            value={car.specs.transmission}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, transmission: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, transmission: e.target.value}})
-            }
-            placeholder="Enter transmission"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Drivetrain</label>
-          <input
-            type="text"
-            value={car.specs.drivetrain}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, specs: {...car.specs, drivetrain: e.target.value}})
-              : setNewCar({...car, specs: {...car.specs, drivetrain: e.target.value}})
-            }
-            placeholder="Enter drivetrain"
-          />
-        </div>
-        
-        <div className="form-group full-width">
-          <label>Description</label>
-          <textarea
-            value={car.description}
-            onChange={(e) => isEdit 
-              ? setEditingCar({...car, description: e.target.value})
-              : setNewCar({...car, description: e.target.value})
-            }
-            placeholder="Enter car description"
-            rows="3"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={car.featured}
-              onChange={(e) => isEdit 
-                ? setEditingCar({...car, featured: e.target.checked})
-                : setNewCar({...car, featured: e.target.checked})
-              }
-            />
-            Featured Car
-          </label>
-        </div>
-        
-        <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={car.availability}
-              onChange={(e) => isEdit 
-                ? setEditingCar({...car, availability: e.target.checked})
-                : setNewCar({...car, availability: e.target.checked})
-              }
-            />
-            Available
-          </label>
-        </div>
-      </div>
-      
-      <div className="form-actions">
-        <button 
-          onClick={isEdit ? handleUpdateCar : handleAddCar} 
-          className="save-btn"
-        >
-          {isEdit ? 'Update Car' : 'Add Car'}
-        </button>
-        <button 
-          onClick={() => isEdit ? setEditingCar(null) : setShowAddForm(false)} 
-          className="cancel-btn"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="dashboard-container redblack-bg">
-      <div className="dashboard-header">
-        <h1>VIP Motors - Admin Dashboard</h1>
+    <div className="admin-dashboard">
+      <div className="admin-header">
+        <h1>VIP Motors Admin Dashboard</h1>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </div>
       
+      {error && <div className="error-message">{error}</div>}
+      {loading && <div className="loading-message">Loading...</div>}
+      
       <div className="admin-tabs">
         <button 
-          onClick={() => setActiveTab('overview')} 
           className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
         >
           Overview
         </button>
         <button 
-          onClick={() => setActiveTab('manage')} 
           className={`tab-btn ${activeTab === 'manage' ? 'active' : ''}`}
+          onClick={() => setActiveTab('manage')}
         >
           Manage Cars
         </button>
         <button 
-          onClick={() => setActiveTab('users')} 
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
         >
           Users
         </button>
         <button 
-          onClick={() => setActiveTab('analytics')} 
           className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
         >
           Analytics
         </button>
       </div>
       
-      <div className="dashboard-content">
-        <div className="admin-content">
-          {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'manage' && renderCarManagement()}
-          {activeTab === 'users' && (
-            <div className="users-section">
-              <h3>User Management</h3>
-              <p>User management functionality will be implemented here.</p>
+      <div className="tab-content">
+        {activeTab === 'overview' && (
+          <div className="overview-section">
+            <h3>Dashboard Overview</h3>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h4>Total Cars</h4>
+                <p className="stat-number">{cars.length}</p>
+              </div>
+              <div className="stat-card">
+                <h4>Available Cars</h4>
+                <p className="stat-number">{cars.filter(car => car.availability).length}</p>
+              </div>
+              <div className="stat-card">
+                <h4>Featured Cars</h4>
+                <p className="stat-number">{cars.filter(car => car.featured).length}</p>
+              </div>
+              <div className="stat-card">
+                <h4>Total Value</h4>
+                <p className="stat-number">{formatPrice(cars.reduce((sum, car) => sum + car.price, 0))}</p>
+              </div>
             </div>
-          )}
-          {activeTab === 'analytics' && (
-            <div className="analytics-section">
-              <h3>Analytics Dashboard</h3>
-              <p>Analytics and reporting functionality will be implemented here.</p>
+            
+            <div className="recent-activity">
+              <h3>Quick Actions</h3>
+              <div className="action-buttons">
+                <button onClick={() => setActiveTab('manage')} className="action-btn">
+                  Manage Cars
+                </button>
+                <button onClick={() => setShowAddForm(true)} className="action-btn">
+                  Add New Car
+                </button>
+                <button onClick={() => setActiveTab('users')} className="action-btn">
+                  View Users
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        
+        {activeTab === 'manage' && (
+          <div className="car-management">
+            <div className="management-header">
+              <h3>Car Inventory Management</h3>
+              <button onClick={() => setShowAddForm(true)} className="add-car-btn">
+                + Add New Car
+              </button>
+            </div>
+            
+            <div className="cars-table">
+              {cars.map(car => (
+                <div key={car._id} className="car-row">
+                  <img src={car.image} alt={car.name} className="car-thumbnail" />
+                  <div className="car-details">
+                    <h4>{car.name}</h4>
+                    <p>{car.brand} • {formatPrice(car.price)}</p>
+                    <p>{car.specs.horsepower} HP • {car.specs.topSpeed}</p>
+                  </div>
+                  <div className="car-status">
+                    <span className={`status-badge ${car.availability ? 'available' : 'unavailable'}`}>
+                      {car.availability ? 'Available' : 'Unavailable'}
+                    </span>
+                    {car.featured && <span className="featured-badge">Featured</span>}
+                  </div>
+                  <div className="car-actions">
+                    <button onClick={() => handleEditCar(car)} className="edit-btn">
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => toggleCarAvailability(car._id)} 
+                      className={`toggle-btn ${car.availability ? 'disable' : 'enable'}`}
+                    >
+                      {car.availability ? 'Disable' : 'Enable'}
+                    </button>
+                    <button 
+                      onClick={() => toggleCarFeatured(car._id)} 
+                      className={`feature-btn ${car.featured ? 'unfeature' : 'feature'}`}
+                    >
+                      {car.featured ? 'Unfeature' : 'Feature'}
+                    </button>
+                    <button onClick={() => handleDeleteCar(car._id)} className="delete-btn">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {activeTab === 'users' && (
+          <div className="users-section">
+            <h3>User Management</h3>
+            <p>User management features coming soon...</p>
+          </div>
+        )}
+        
+        {activeTab === 'analytics' && (
+          <div className="analytics-section">
+            <h3>Analytics</h3>
+            <p>Analytics dashboard coming soon...</p>
+          </div>
+        )}
       </div>
-
-      {/* Add Car Modal */}
+      
+      {/* Add Car Form */}
       {showAddForm && (
-        <div className="modal-overlay" onClick={() => setShowAddForm(false)}>
-          <div className="modal-content admin-modal" onClick={e => e.stopPropagation()}>
-            <button 
-              className="modal-close"
-              onClick={() => setShowAddForm(false)}
-            >
-              ×
-            </button>
-            {renderCarForm(newCar, false)}
+        <div className="modal-overlay">
+          <div className="add-car-modal">
+            <h3>Add New Car</h3>
+            <div className="car-form">
+              <div className="form-row">
+                <input
+                  type="text"
+                  placeholder="Car Name"
+                  value={newCar.name}
+                  onChange={(e) => setNewCar({...newCar, name: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Brand"
+                  value={newCar.brand}
+                  onChange={(e) => setNewCar({...newCar, brand: e.target.value})}
+                />
+              </div>
+              <div className="form-row">
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={newCar.price}
+                  onChange={(e) => setNewCar({...newCar, price: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Image URL"
+                  value={newCar.image}
+                  onChange={(e) => setNewCar({...newCar, image: e.target.value})}
+                />
+              </div>
+              <textarea
+                placeholder="Description"
+                value={newCar.description}
+                onChange={(e) => setNewCar({...newCar, description: e.target.value})}
+              />
+              
+              <h4>Specifications</h4>
+              <div className="specs-grid">
+                <input
+                  type="text"
+                  placeholder="Engine"
+                  value={newCar.specs.engine}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, engine: e.target.value}})}
+                />
+                <input
+                  type="number"
+                  placeholder="Horsepower"
+                  value={newCar.specs.horsepower}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, horsepower: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Top Speed"
+                  value={newCar.specs.topSpeed}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, topSpeed: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="0-60 mph"
+                  value={newCar.specs.acceleration}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, acceleration: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Transmission"
+                  value={newCar.specs.transmission}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, transmission: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Drivetrain"
+                  value={newCar.specs.drivetrain}
+                  onChange={(e) => setNewCar({...newCar, specs: {...newCar.specs, drivetrain: e.target.value}})}
+                />
+              </div>
+              
+              <div className="form-checkboxes">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newCar.featured}
+                    onChange={(e) => setNewCar({...newCar, featured: e.target.checked})}
+                  />
+                  Featured Car
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newCar.availability}
+                    onChange={(e) => setNewCar({...newCar, availability: e.target.checked})}
+                  />
+                  Available
+                </label>
+              </div>
+              
+              <div className="form-actions">
+                <button onClick={handleAddCar} className="save-btn">Add Car</button>
+                <button onClick={() => setShowAddForm(false)} className="cancel-btn">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Edit Car Modal */}
+      {/* Edit Car Form */}
       {editingCar && (
-        <div className="modal-overlay" onClick={() => setEditingCar(null)}>
-          <div className="modal-content admin-modal" onClick={e => e.stopPropagation()}>
-            <button 
-              className="modal-close"
-              onClick={() => setEditingCar(null)}
-            >
-              ×
-            </button>
-            {renderCarForm(editingCar, true)}
+        <div className="modal-overlay">
+          <div className="edit-car-modal">
+            <h3>Edit Car</h3>
+            <div className="car-form">
+              <div className="form-row">
+                <input
+                  type="text"
+                  placeholder="Car Name"
+                  value={editingCar.name}
+                  onChange={(e) => setEditingCar({...editingCar, name: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Brand"
+                  value={editingCar.brand}
+                  onChange={(e) => setEditingCar({...editingCar, brand: e.target.value})}
+                />
+              </div>
+              <div className="form-row">
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={editingCar.price}
+                  onChange={(e) => setEditingCar({...editingCar, price: e.target.value})}
+                />
+                <input
+                  type="text"
+                  placeholder="Image URL"
+                  value={editingCar.image}
+                  onChange={(e) => setEditingCar({...editingCar, image: e.target.value})}
+                />
+              </div>
+              <textarea
+                placeholder="Description"
+                value={editingCar.description}
+                onChange={(e) => setEditingCar({...editingCar, description: e.target.value})}
+              />
+              
+              <h4>Specifications</h4>
+              <div className="specs-grid">
+                <input
+                  type="text"
+                  placeholder="Engine"
+                  value={editingCar.specs.engine}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, engine: e.target.value}})}
+                />
+                <input
+                  type="number"
+                  placeholder="Horsepower"
+                  value={editingCar.specs.horsepower}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, horsepower: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Top Speed"
+                  value={editingCar.specs.topSpeed}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, topSpeed: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="0-60 mph"
+                  value={editingCar.specs.acceleration}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, acceleration: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Transmission"
+                  value={editingCar.specs.transmission}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, transmission: e.target.value}})}
+                />
+                <input
+                  type="text"
+                  placeholder="Drivetrain"
+                  value={editingCar.specs.drivetrain}
+                  onChange={(e) => setEditingCar({...editingCar, specs: {...editingCar.specs, drivetrain: e.target.value}})}
+                />
+              </div>
+              
+              <div className="form-checkboxes">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editingCar.featured}
+                    onChange={(e) => setEditingCar({...editingCar, featured: e.target.checked})}
+                  />
+                  Featured Car
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editingCar.availability}
+                    onChange={(e) => setEditingCar({...editingCar, availability: e.target.checked})}
+                  />
+                  Available
+                </label>
+              </div>
+              
+              <div className="form-actions">
+                <button onClick={handleUpdateCar} className="save-btn">Update Car</button>
+                <button onClick={() => setEditingCar(null)} className="cancel-btn">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
