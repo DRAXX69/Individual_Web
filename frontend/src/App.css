@@ -1638,3 +1638,317 @@ body, #root, .redblack-bg {
     align-self: center;
   }
 }
+
+/* User Management Styles */
+.users-section {
+  background: rgba(24, 24, 24, 0.95);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 2px solid #b30000;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.users-header h3 {
+  color: #b30000;
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.user-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.user-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  color: #b30000;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.loading-users {
+  text-align: center;
+  color: #ccc;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #333;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(34, 34, 34, 0.8);
+}
+
+.users-table th {
+  background: rgba(179, 0, 0, 0.2);
+  color: #b30000;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #b30000;
+}
+
+.users-table td {
+  padding: 1rem;
+  color: #fff;
+  border-bottom: 1px solid #333;
+  font-size: 0.9rem;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(179, 0, 0, 0.1);
+}
+
+.user-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.user-email {
+  color: #ccc;
+}
+
+.user-phone {
+  color: #ccc;
+}
+
+.user-date {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.user-status {
+  text-align: center;
+}
+
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid #28a745;
+}
+
+.no-users {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* User Management Responsive Design */
+@media (max-width: 768px) {
+  .users-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .users-table {
+    font-size: 0.8rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.7rem 0.5rem;
+  }
+}
+
+/* User Management Styles */
+.users-section {
+  background: rgba(24, 24, 24, 0.95);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 2px solid #b30000;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.users-header h3 {
+  color: #b30000;
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.user-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.user-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  color: #b30000;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.loading-users {
+  text-align: center;
+  color: #ccc;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #333;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(34, 34, 34, 0.8);
+}
+
+.users-table th {
+  background: rgba(179, 0, 0, 0.2);
+  color: #b30000;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #b30000;
+}
+
+.users-table td {
+  padding: 1rem;
+  color: #fff;
+  border-bottom: 1px solid #333;
+  font-size: 0.9rem;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(179, 0, 0, 0.1);
+}
+
+.user-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.user-email {
+  color: #ccc;
+}
+
+.user-phone {
+  color: #ccc;
+}
+
+.user-date {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.user-status {
+  text-align: center;
+}
+
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid #28a745;
+}
+
+.no-users {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* User Management Responsive Design */
+@media (max-width: 768px) {
+  .users-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .users-table {
+    font-size: 0.8rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.7rem 0.5rem;
+  }
+}

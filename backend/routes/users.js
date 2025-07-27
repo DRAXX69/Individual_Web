@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const Car = require('../models/Car');
 const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
 const router = express.Router();
 
 // Get user profile (protected route)
@@ -90,6 +91,39 @@ router.delete('/cart/:carId', auth, async (req, res) => {
   } catch (error) {
     console.error('Error removing from cart:', error);
     res.status(500).json({ message: 'Server error while removing from cart' });
+  }
+});
+
+// Get all users (admin only)
+router.get('/all', auth, adminAuth, async (req, res) => {
+  try {
+    const users = await User.find({ role: 'user' })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get user statistics (admin only)
+router.get('/stats', auth, adminAuth, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({ role: 'user' });
+    const recentUsers = await User.countDocuments({ 
+      role: 'user',
+      createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Last 30 days
+    });
+    
+    res.json({
+      totalUsers,
+      recentUsers
+    });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

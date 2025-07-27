@@ -6,6 +6,9 @@ import apiService from './services/api';
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [users, setUsers] = useState([]);
+  const [userStats, setUserStats] = useState({ totalUsers: 0, recentUsers: 0 });
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [cars, setCars] = useState([
     {
       id: 1,
@@ -67,6 +70,31 @@ function AdminDashboard() {
   const handleLogout = () => {
     apiService.removeAuthToken();
     navigate('/');
+  };
+
+  // Fetch users when Users tab is selected
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const [usersData, statsData] = await Promise.all([
+        apiService.getAllUsers(),
+        apiService.getUserStats()
+      ]);
+      setUsers(usersData);
+      setUserStats(statsData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Fetch users when users tab is activated
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'users') {
+      fetchUsers();
+    }
   };
 
   const handleAddCar = () => {
@@ -167,6 +195,10 @@ function AdminDashboard() {
           <p className="stat-number">{cars.filter(car => car.featured).length}</p>
         </div>
         <div className="stat-card">
+          <h3>Total Users</h3>
+          <p className="stat-number">{userStats.totalUsers}</p>
+        </div>
+        <div className="stat-card">
           <h3>Total Value</h3>
           <p className="stat-number">{formatPrice(cars.reduce((sum, car) => sum + car.price, 0))}</p>
         </div>
@@ -186,6 +218,69 @@ function AdminDashboard() {
           </button>
         </div>
       </div>
+    </div>
+  );
+
+  const renderUserManagement = () => (
+    <div className="users-section">
+      <div className="users-header">
+        <h3>User Management</h3>
+        <div className="user-stats">
+          <div className="user-stat">
+            <span className="stat-label">Total Users:</span>
+            <span className="stat-value">{userStats.totalUsers}</span>
+          </div>
+          <div className="user-stat">
+            <span className="stat-label">New Users (30 days):</span>
+            <span className="stat-value">{userStats.recentUsers}</span>
+          </div>
+        </div>
+      </div>
+      
+      {loadingUsers ? (
+        <div className="loading-users">
+          <p>Loading users...</p>
+        </div>
+      ) : (
+        <div className="users-table-container">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="no-users">
+                    No users registered yet
+                  </td>
+                </tr>
+              ) : (
+                users.map(user => (
+                  <tr key={user._id}>
+                    <td className="user-name">
+                      {user.firstName} {user.lastName}
+                    </td>
+                    <td className="user-email">{user.email}</td>
+                    <td className="user-phone">{user.phone || 'N/A'}</td>
+                    <td className="user-date">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="user-status">
+                      <span className="status-badge active">Active</span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 
@@ -441,25 +536,25 @@ function AdminDashboard() {
       
       <div className="admin-tabs">
         <button 
-          onClick={() => setActiveTab('overview')} 
+          onClick={() => handleTabChange('overview')} 
           className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
         >
           Overview
         </button>
         <button 
-          onClick={() => setActiveTab('manage')} 
+          onClick={() => handleTabChange('manage')} 
           className={`tab-btn ${activeTab === 'manage' ? 'active' : ''}`}
         >
           Manage Cars
         </button>
         <button 
-          onClick={() => setActiveTab('users')} 
+          onClick={() => handleTabChange('users')} 
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
         >
           Users
         </button>
         <button 
-          onClick={() => setActiveTab('analytics')} 
+          onClick={() => handleTabChange('analytics')} 
           className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
         >
           Analytics
@@ -470,12 +565,7 @@ function AdminDashboard() {
         <div className="admin-content">
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'manage' && renderCarManagement()}
-          {activeTab === 'users' && (
-            <div className="users-section">
-              <h3>User Management</h3>
-              <p>User management functionality will be implemented here.</p>
-            </div>
-          )}
+          {activeTab === 'users' && renderUserManagement()}
           {activeTab === 'analytics' && (
             <div className="analytics-section">
               <h3>Analytics Dashboard</h3>

@@ -111,6 +111,23 @@ class ApiService {
     });
   }
 
+  // User management methods
+  async getAllUsers() {
+    return this.makeRequest('/users/all', {
+      headers: {
+        Authorization: `Bearer ${this.getAuthToken()}`,
+      },
+    });
+  }
+
+  async getUserStats() {
+    return this.makeRequest('/users/stats', {
+      headers: {
+        Authorization: `Bearer ${this.getAuthToken()}`,
+      },
+    });
+  }
+
   // Auth helper methods
   setAuthToken(token) {
     localStorage.setItem('authToken', token);
