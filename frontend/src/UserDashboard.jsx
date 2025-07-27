@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './App.css';
 import apiService from './services/api';
-import carDataService from './services/carData';
 
 function UserDashboard() {
   const navigate = useNavigate();
@@ -10,33 +9,106 @@ function UserDashboard() {
   const [selectedCar, setSelectedCar] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [hypercars, setHypercars] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Load car data on component mount
-  useEffect(() => {
-    const loadCars = async () => {
-      try {
-        setLoading(true);
-        const availableCars = await carDataService.getAvailableCars();
-        setHypercars(availableCars);
-      } catch (error) {
-        console.error('Error loading cars:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCars();
-
-    // Subscribe to car data changes
-    const unsubscribe = carDataService.subscribe((updatedCars) => {
-      const availableCars = updatedCars.filter(car => car.available);
-      setHypercars(availableCars);
-    });
-
-    return unsubscribe;
-  }, []);
+  // Sample hypercar data
+  const hypercars = [
+    {
+      id: 1,
+      name: "Koenigsegg Jesko",
+      brand: "Koenigsegg",
+      price: 3000000,
+      image: "/jesko.jpg",
+      specs: {
+        engine: "5.0L Twin-Turbo V8",
+        horsepower: 1600,
+        topSpeed: "330 mph",
+        acceleration: "0-60 mph in 2.5s",
+        transmission: "9-speed Multi-clutch",
+        drivetrain: "RWD"
+      },
+      description: "The Koenigsegg Jesko is a track-focused hypercar with revolutionary aerodynamics and unmatched performance."
+    },
+    {
+      id: 2,
+      name: "Bugatti Chiron Super Sport",
+      brand: "Bugatti",
+      price: 3900000,
+      image: "/chiron.jpg",
+      specs: {
+        engine: "8.0L Quad-Turbo W16",
+        horsepower: 1577,
+        topSpeed: "304 mph",
+        acceleration: "0-60 mph in 2.4s",
+        transmission: "7-speed Dual-clutch",
+        drivetrain: "AWD"
+      },
+      description: "The ultimate expression of Bugatti's engineering prowess, combining luxury with extreme performance."
+    },
+    {
+      id: 3,
+      name: "McLaren Speedtail",
+      brand: "McLaren",
+      price: 2250000,
+      image: "/speedtail.jpg",
+      specs: {
+        engine: "4.0L Twin-Turbo V8 Hybrid",
+        horsepower: 1035,
+        topSpeed: "250 mph",
+        acceleration: "0-60 mph in 2.5s",
+        transmission: "7-speed Dual-clutch",
+        drivetrain: "RWD"
+      },
+      description: "A hyper-GT that redefines automotive design with its teardrop silhouette and hybrid powertrain."
+    },
+    {
+      id: 4,
+      name: "Pagani Huayra BC",
+      brand: "Pagani",
+      price: 2800000,
+      image: "/huayra.jpg",
+      specs: {
+        engine: "6.0L Twin-Turbo V12",
+        horsepower: 789,
+        topSpeed: "238 mph",
+        acceleration: "0-60 mph in 2.8s",
+        transmission: "7-speed Sequential",
+        drivetrain: "RWD"
+      },
+      description: "Italian artistry meets extreme performance in this carbon fiber masterpiece."
+    },
+    {
+      id: 5,
+      name: "Rimac Nevera",
+      brand: "Rimac",
+      price: 2400000,
+      image: "/nevera.jpg",
+      specs: {
+        engine: "Quad Electric Motors",
+        horsepower: 1914,
+        topSpeed: "258 mph",
+        acceleration: "0-60 mph in 1.85s",
+        transmission: "Single-speed",
+        drivetrain: "AWD"
+      },
+      description: "The world's fastest electric hypercar, showcasing the future of automotive performance."
+    },
+    {
+      id: 6,
+      name: "Ferrari LaFerrari Aperta",
+      brand: "Ferrari",
+      price: 2200000,
+      image: "/laferrari.jpg",
+      specs: {
+        engine: "6.3L V12 Hybrid",
+        horsepower: 950,
+        topSpeed: "217 mph",
+        acceleration: "0-60 mph in 2.6s",
+        transmission: "7-speed Dual-clutch",
+        drivetrain: "RWD"
+      },
+      description: "The open-top version of Ferrari's flagship hypercar, combining F1 technology with pure emotion."
+    }
+  ];
 
   const handleLogout = () => {
     apiService.removeAuthToken();
@@ -227,13 +299,8 @@ function UserDashboard() {
               </button>
             </div>
           </div>
-        ) : loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading hypercars...</p>
-          </div>
         ) : (
-          <div className="hypercar-grid">
+          <div className="hypercars-grid">
             {hypercars.map(car => (
               <div key={car.id} className="hypercar-card">
                 <div className="car-image-container">
