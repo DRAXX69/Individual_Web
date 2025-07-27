@@ -1436,3 +1436,205 @@ body, #root, .redblack-bg {
     justify-content: center;
   }
 }
+
+/* Payment Options Styles */
+.payment-section {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.payment-card {
+  background: rgba(24, 24, 24, 0.95);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(179, 0, 0, 0.25);
+  max-width: 600px;
+  width: 100%;
+  border: 2px solid #b30000;
+}
+
+.payment-card h2 {
+  color: #b30000;
+  font-weight: 900;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+
+.order-summary {
+  background: rgba(34, 34, 34, 0.8);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #333;
+  margin-bottom: 2rem;
+}
+
+.order-summary h3 {
+  color: #b30000;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.summary-items {
+  margin-bottom: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  color: #ccc;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.summary-total {
+  border-top: 1px solid #333;
+  padding-top: 1rem;
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: right;
+}
+
+.payment-methods h3 {
+  color: #b30000;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.payment-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(34, 34, 34, 0.8);
+  border: 2px solid #333;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.payment-btn:hover {
+  border-color: #b30000;
+  background: rgba(179, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.connectips-btn:hover {
+  border-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.esewa-btn:hover {
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.payment-logo {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.payment-logo-text {
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+}
+
+.connectips-logo {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.connectips-logo .payment-logo-text {
+  color: #fff;
+}
+
+.esewa-logo {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.esewa-logo .payment-logo-text {
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info h4 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.payment-info p {
+  color: #ccc;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.payment-actions {
+  text-align: center;
+  border-top: 2px solid #333;
+  padding-top: 2rem;
+}
+
+.back-to-cart-btn {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.back-to-cart-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Payment Responsive Design */
+@media (max-width: 768px) {
+  .payment-section {
+    padding: 1rem;
+  }
+  
+  .payment-card {
+    padding: 1.5rem;
+  }
+  
+  .payment-btn {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .payment-logo {
+    align-self: center;
+  }
+}

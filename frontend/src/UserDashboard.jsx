@@ -8,6 +8,7 @@ function UserDashboard() {
   const [cart, setCart] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   // Sample hypercar data
   const hypercars = [
@@ -156,6 +157,81 @@ function UserDashboard() {
     }).format(price);
   };
 
+  // Payment handler functions
+  const handleConnectIPSPayment = () => {
+    // Redirect to ConnectIPS payment gateway
+    const connectIPSUrl = 'https://connectips.com/';
+    window.open(connectIPSUrl, '_blank');
+  };
+
+  const handleESewaPayment = () => {
+    // Redirect to eSewa payment gateway
+    const eSewaUrl = 'https://esewa.com.np/#/home';
+    window.open(eSewaUrl, '_blank');
+  };
+
+  const renderPaymentOptions = () => (
+    <div className="payment-section">
+      <div className="payment-card">
+        <h2>Choose Payment Method</h2>
+        <div className="order-summary">
+          <h3>Order Summary</h3>
+          <div className="summary-items">
+            {cart.map(item => (
+              <div key={item.id} className="summary-item">
+                <span>{item.name} x {item.quantity}</span>
+                <span>{formatPrice(item.price * item.quantity)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="summary-total">
+            <strong>Total: {formatPrice(getTotalPrice())}</strong>
+          </div>
+        </div>
+        
+        <div className="payment-methods">
+          <h3>Select Payment Gateway</h3>
+          <div className="payment-options">
+            <button 
+              onClick={handleConnectIPSPayment}
+              className="payment-btn connectips-btn"
+            >
+              <div className="payment-logo connectips-logo">
+                <span className="payment-logo-text">CIP</span>
+              </div>
+              <div className="payment-info">
+                <h4>ConnectIPS</h4>
+                <p>Pay securely with your bank account</p>
+              </div>
+            </button>
+            
+            <button 
+              onClick={handleESewaPayment}
+              className="payment-btn esewa-btn"
+            >
+              <div className="payment-logo esewa-logo">
+                <span className="payment-logo-text">eSewa</span>
+              </div>
+              <div className="payment-info">
+                <h4>eSewa</h4>
+                <p>Digital wallet payment solution</p>
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <div className="payment-actions">
+          <button 
+            onClick={() => setShowPayment(false)}
+            className="back-to-cart-btn"
+          >
+            Back to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="dashboard-container redblack-bg">
       <div className="dashboard-header">
@@ -172,7 +248,9 @@ function UserDashboard() {
       </div>
       
       <div className="dashboard-content">
-        {showCheckout ? (
+        {showPayment ? (
+          renderPaymentOptions()
+        ) : showCheckout ? (
           <div className="checkout-section">
             <div className="checkout-card">
               <h2>Shopping Cart</h2>
@@ -204,7 +282,12 @@ function UserDashboard() {
                   </div>
                   <div className="cart-total">
                     <h3>Total: {formatPrice(getTotalPrice())}</h3>
-                    <button className="checkout-btn">Proceed to Checkout</button>
+                    <button 
+                      onClick={() => setShowPayment(true)}
+                      className="checkout-btn"
+                    >
+                      Proceed to Checkout
+                    </button>
                   </div>
                 </>
               )}
