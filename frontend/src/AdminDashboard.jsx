@@ -1,49 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import apiService from './services/api';
+import carDataService from './services/carData';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [cars, setCars] = useState([
-    {
-      id: 1,
-      name: "Koenigsegg Jesko",
-      brand: "Koenigsegg",
-      price: 3000000,
-      image: "/jesko.jpg",
-      specs: {
-        engine: "5.0L Twin-Turbo V8",
-        horsepower: 1600,
-        topSpeed: "330 mph",
-        acceleration: "0-60 mph in 2.5s",
-        transmission: "9-speed Multi-clutch",
-        drivetrain: "RWD"
-      },
-      description: "The Koenigsegg Jesko is a track-focused hypercar with revolutionary aerodynamics and unmatched performance.",
-      featured: true,
-      availability: true
-    },
-    {
-      id: 2,
-      name: "Bugatti Chiron Super Sport",
-      brand: "Bugatti",
-      price: 3900000,
-      image: "/chiron.jpg",
-      specs: {
-        engine: "8.0L Quad-Turbo W16",
-        horsepower: 1577,
-        topSpeed: "304 mph",
-        acceleration: "0-60 mph in 2.4s",
-        transmission: "7-speed Dual-clutch",
-        drivetrain: "AWD"
-      },
-      description: "The ultimate expression of Bugatti's engineering prowess, combining luxury with extreme performance.",
-      featured: true,
-      availability: true
-    }
-  ]);
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingCar, setEditingCar] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCar, setNewCar] = useState({
@@ -64,82 +29,110 @@ function AdminDashboard() {
     availability: true
   });
 
+  // Load car data on component mount
+  useEffect(() => {
+    const loadCars = async () => {
+      try {
+        setLoading(true);
+        const allCars = await carDataService.getCars();
+        setCars(allCars);
+      } catch (error) {
+        console.error('Error loading cars:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCars();
+
+    // Subscribe to car data changes
+    const unsubscribe = carDataService.subscribe((updatedCars) => {
+      setCars(updatedCars);
+    });
+
+    return unsubscribe;
+  }, []);
+
   const handleLogout = () => {
     apiService.removeAuthToken();
     navigate('/');
   };
 
-  const handleAddCar = () => {
-    const carToAdd = {
-      ...newCar,
-      id: Date.now(),
-      price: parseFloat(newCar.price),
-      specs: {
-        ...newCar.specs,
-        horsepower: parseInt(newCar.specs.horsepower)
-      }
-    };
-    setCars([...cars, carToAdd]);
-    setNewCar({
-      name: '',
-      brand: '',
-      price: '',
-      image: '',
-      specs: {
-        engine: '',
-        horsepower: '',
-        topSpeed: '',
-        acceleration: '',
-        transmission: '',
-        drivetrain: ''
-      },
-      description: '',
-      featured: false,
-      availability: true
-    });
-    setShowAddForm(false);
+  const handleAddCar = async () => {
+    try {
+      const carData = {
+        ...newCar,
+        price: parseFloat(newCar.price)
+      };
+      await carDataService.addCar(carData);
+      setNewCar({
+        name: '',
+        brand: '',
+        price: '',
+        image: '',
+        specs: {
+          engine: '',
+          horsepower: '',
+          topSpeed: '',
+          acceleration: '',
+          transmission: '',
+          drivetrain: ''
+        },
+        description: '',
+        featured: false,
+        availability: true
+      });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error('Error adding car:', error);
+      alert('Failed to add car. Please try again.');
+    }
   };
 
   const handleEditCar = (car) => {
     setEditingCar({ ...car });
   };
 
-  const handleUpdateCar = () => {
-    setCars(cars.map(car => 
-      car.id === editingCar.id 
-        ? {
-            ...editingCar,
-            price: parseFloat(editingCar.price),
-            specs: {
-              ...editingCar.specs,
-              horsepower: parseInt(editingCar.specs.horsepower)
-            }
-          }
-        : car
-    ));
-    setEditingCar(null);
-  };
-
-  const handleDeleteCar = (carId) => {
-    if (window.confirm('Are you sure you want to delete this car?')) {
-      setCars(cars.filter(car => car.id !== carId));
+  const handleUpdateCar = async () => {
+    try {
+      await carDataService.updateCar(editingCar);
+      setCars(cars.map(car => 
+        car.id === editingCar.id 
+          ? editingCar
+          : car
+      ));
+      setEditingCar(null);
+    } catch (error) {
+      console.error('Error updating car:', error);
+      alert('Failed to update car. Please try again.');
     }
   };
 
-  const toggleCarAvailability = (carId) => {
-    setCars(cars.map(car => 
-      car.id === carId 
-        ? { ...car, availability: !car.availability }
-        : car
-    ));
+  const handleDeleteCar = async (carId) => {
+    try {
+      await carDataService.deleteCar(carId);
+    } catch (error) {
+      console.error('Error deleting car:', error);
+      alert('Failed to delete car. Please try again.');
+    }
   };
 
-  const toggleCarFeatured = (carId) => {
-    setCars(cars.map(car => 
-      car.id === carId 
-        ? { ...car, featured: !car.featured }
-        : car
-    ));
+  const toggleAvailability = async (carId) => {
+    try {
+      await carDataService.toggleAvailability(carId);
+    } catch (error) {
+      console.error('Error toggling availability:', error);
+      alert('Failed to update car availability. Please try again.');
+    }
+  };
+
+  const toggleFeatured = async (carId) => {
+    try {
+      await carDataService.toggleFeatured(carId);
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
+      alert('Failed to update car featured status. Please try again.');
+    }
   };
 
   const formatPrice = (price) => {
@@ -189,17 +182,23 @@ function AdminDashboard() {
     </div>
   );
 
-  const renderCarManagement = () => (
-    <div className="car-management">
-      <div className="management-header">
-        <h3>Car Inventory Management</h3>
+  const renderManageCars = () => (
+    <div className="manage-cars-section">
+      <div className="section-header">
+        <h2>Manage Cars</h2>
         <button onClick={() => setShowAddForm(true)} className="add-car-btn">
-          + Add New Car
+          Add New Car
         </button>
       </div>
       
-      <div className="cars-table">
-        {cars.map(car => (
+      {loading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading cars...</p>
+        </div>
+      ) : (
+        <div className="cars-grid">
+          {cars.map(car => (
           <div key={car.id} className="car-row">
             <img src={car.image} alt={car.name} className="car-thumbnail" />
             <div className="car-details">
@@ -208,8 +207,8 @@ function AdminDashboard() {
               <p>{car.specs.horsepower} HP • {car.specs.topSpeed}</p>
             </div>
             <div className="car-status">
-              <span className={`status-badge ${car.availability ? 'available' : 'unavailable'}`}>
-                {car.availability ? 'Available' : 'Unavailable'}
+              <span className={`status-badge ${car.available ? 'available' : 'unavailable'}`}>
+                {car.available ? 'Available' : 'Unavailable'}
               </span>
               {car.featured && <span className="featured-badge">Featured</span>}
             </div>
@@ -218,13 +217,13 @@ function AdminDashboard() {
                 Edit
               </button>
               <button 
-                onClick={() => toggleCarAvailability(car.id)} 
-                className={`toggle-btn ${car.availability ? 'disable' : 'enable'}`}
+                onClick={() => toggleAvailability(car.id)} 
+                className={`toggle-btn ${car.available ? 'disable' : 'enable'}`}
               >
-                {car.availability ? 'Disable' : 'Enable'}
+                {car.available ? 'Disable' : 'Enable'}
               </button>
               <button 
-                onClick={() => toggleCarFeatured(car.id)} 
+                onClick={() => toggleFeatured(car.id)} 
                 className={`feature-btn ${car.featured ? 'unfeature' : 'feature'}`}
               >
                 {car.featured ? 'Unfeature' : 'Feature'}
@@ -235,7 +234,8 @@ function AdminDashboard() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 
